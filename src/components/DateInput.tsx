@@ -1,0 +1,83 @@
+import { useEffect, useState } from "react";
+
+interface DateInputProps {
+  value: string;
+  onChange: (isoDate: string) => void;
+  required?: boolean;
+  label?: string;
+}
+
+const toDisplay = (iso: string) => {
+  if (!iso) return "";
+  const [year, month, day] = iso.split("-");
+  return year && month && day ? `${day}/${month}/${year}` : iso;
+};
+
+const toISO = (display: string): string | null => {
+  const match = display.match(/^(\d{1,2})[\/-](\d{1,2})[\/-](\d{2}|\d{4})$/);
+  if (!match) return null;
+  const day = Number(match[1]);
+  const month = Number(match[2]);
+  const year =
+    match[3].length === 2 ? 2000 + Number(match[3]) : Number(match[3]);
+  const date = new Date(year, month - 1, day);
+  if (
+    date.getFullYear() !== year ||
+    date.getMonth() !== month - 1 ||
+    date.getDate() !== day
+  )
+    return null;
+  return `${year}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+};
+
+const mask = (value: string) => {
+  const digits = value.replace(/\D/g, "").slice(0, 8);
+  if (digits.length <= 2) return digits;
+  if (digits.length <= 4) return `${digits.slice(0, 2)}/${digits.slice(2)}`;
+  return `${digits.slice(0, 2)}/${digits.slice(2, 4)}/${digits.slice(4)}`;
+};
+
+export default function DateInput({
+  value,
+  onChange,
+  required,
+  label,
+}: DateInputProps) {
+  const [display, setDisplay] = useState(toDisplay(value));
+  const [invalid, setInvalid] = useState(false);
+  useEffect(() => setDisplay(toDisplay(value)), [value]);
+
+  const commit = (text: string) => {
+    if (!text) {
+      setInvalid(Boolean(required));
+      onChange("");
+      return;
+    }
+    const iso = toISO(text);
+    setInvalid(!iso);
+    if (iso) onChange(iso);
+  };
+
+  return (
+    <div className="date-control">
+      <input
+        aria-label={label}
+        aria-invalid={invalid}
+        inputMode="numeric"
+        placeholder="DD/MM/YYYY"
+        value={display}
+        maxLength={10}
+        required={required}
+        onChange={(event) => {
+          const next = mask(event.target.value);
+          setDisplay(next);
+          setInvalid(false);
+          if (next.length === 10) commit(next);
+          if (!next) onChange("");
+        }}
+        onBlur={() => commit(display)}
+      />
+      {invalid && <small>Example 06/07/2026.</small>}
+    </div>
+  );
+}
