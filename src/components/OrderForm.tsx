@@ -239,7 +239,6 @@ export default function OrderForm({
                 <b>Kg</b>
               </div>
             </label>
-            <span className="fixed-unit">Kg</span>
             <label className="mobile-field">
               <span className="mobile-label">Price / Kg</span>
               <input
