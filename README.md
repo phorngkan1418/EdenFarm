@@ -35,3 +35,5 @@ npm run build
 
 Records are stored in the current browser and device. Export an Excel backup regularly. Clearing browser data removes local records.
 "# EdenFarm" 
+"# MYMANAGER" 
+"# EDEN" 
